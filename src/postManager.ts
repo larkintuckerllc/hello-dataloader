@@ -22,3 +22,21 @@ export const readPosts = async (_: Request, res: Response, next: NextFunction) =
     next(error);
   }
 };
+
+export const allPosts = async () => {
+  if (!initialized) {
+    initialize();
+  }
+  return await postRepository.find();
+};
+
+export const tagsOfPost = async (id: number) => {
+  if (!initialized) {
+    initialize();
+  }
+  const post = await postRepository.findOne({
+    relations: ['tags'],
+    where: { id },
+  });
+  return post.tags;
+};
