@@ -1,11 +1,14 @@
 import { ApolloServer, gql } from 'apollo-server-express';
 import cors from 'cors';
+import DataLoader from 'dataloader';
 import express from 'express';
 import { createConnection } from 'typeorm';
 import Post from './entity/Post';
-import { allPosts, readPosts, tagsOfPost } from './postManager';
+import Tag from './entity/Tag';
+import { allPosts, readPosts, tagsOfPost, tagsOfPosts } from './postManager';
 
 createConnection().then(async () => {
+  const tagLoader = new DataLoader<number, Tag[]>(tagsOfPosts);
   const app = express();
   app.use(cors());
   app.use((_, res, next) => {
@@ -31,7 +34,7 @@ createConnection().then(async () => {
   const resolvers = {
     Post: {
       tags(post: Post) {
-        return tagsOfPost(post.id);
+        return tagLoader.load(post.id);
       },
     },
     Query: {
